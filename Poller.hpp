@@ -4,12 +4,16 @@
 #include <poll.h>
 #include <vector>
 #include <iostream>
+#include <map>
+#include <fstream>
 
 class CPoller{
   protected:
     std::vector<pollfd> _userPollfd;
+    std::vector<int> _userFD;
     virtual int setReadPoll(int);
-    virtual bool processReadPoll(int) = 0;
+    virtual bool readPoll(int) = 0;
+    virtual bool removePollfd(int);
 };
 
 #endif

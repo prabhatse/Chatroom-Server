@@ -3,15 +3,15 @@
 #include <poll.h>
 #include <fstream>
 #include "Poller.hpp"
+
+std::ofstream _log("log.txt", std::ofstream::out);
 int main(){
-    std::ofstream _log("log.txt", std::ofstream::out);
     CNetwork &network = CNetwork::getNetwork(49999);
     while(1){
         network.acceptConnection();
         network.start();
-        
+        _log.flush();     
 
     }
-    network.start();
     return 0;
 }

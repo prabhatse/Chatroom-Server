@@ -1,0 +1,1 @@
+g++ -std=c++11 -o Server MessageHandler.hpp MessageHandler.cpp Poller.cpp Poller.hpp Network.cpp Network.hpp ServerMessageHandler.hpp ServerMessageHandler.cpp main.cpp
