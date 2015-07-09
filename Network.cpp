@@ -131,7 +131,7 @@ bool CNetwork::readPoll(int sockfd){
     return false;
   }
 
-  msgHandler.processMessage(action, msg);
+  msgHandler.processMessage(sockfd, action, msg);
 
   return true;
 

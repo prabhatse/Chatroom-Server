@@ -7,15 +7,14 @@
 class CServerMessageHandler: public CMessageHandler{
 public:
     CServerMessageHandler();
-    void A_ClientAuth();
-    void A_GetAvailableRooms();
-    void A_GetRoomStatus();
-    void A_CreateRoom();
-    void A_JoinRoom();
-    void A_LeaveRoom();
-    void A_DeliverMessagePacket();
-    void A_Disconnect();
-
+    void A_ClientAuth(int, std::string&);
+    void A_GetAvailableRooms(int, std::string&);
+    void A_GetRoomStatus(int, std::string&);
+    void A_CreateRoom(int, std::string&);
+    void A_JoinRoom(int, std::string&);
+    void A_LeaveRoom(int, std::string&);
+    void A_DeliverMessagePacket(int, std::string&);
+    void A_Disconnect(int);
 };
 
 #endif

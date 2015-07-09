@@ -132,41 +132,41 @@ void CMessageHandler::writeMsg(int sockfd, std::string &msg){
   _log.flush();
 }
 
-bool CMessageHandler::processMessage(int action, std::string &msg){
+bool CMessageHandler::processMessage(int sockfd, int action, std::string &msg){
   switch(action){
     case CLIENT_AUTH:
-      A_ClientAuth();
+      A_ClientAuth(sockfd, msg);
       break;
     case GET_AVAILABLE_ROOMS:
-      A_GetAvailableRooms();
+      A_GetAvailableRooms(sockfd);
       break;
     case GET_ROOM_STATUS:
-      A_GetRoomStatus();
+      A_GetRoomStatus(sockfd, msg);
       break;
     case CREATE_ROOM:
-      A_CreateRoom();
+      A_CreateRoom(sockfd, msg);
       break;
     case JOIN_ROOM:
-      A_JoinRoom();
+      A_JoinRoom(sockfd, msg);
       break;
     case LEAVE_ROOM:
-      A_LeaveRoom();
+      A_LeaveRoom(sockfd, msg);
       break;
     case DELIVER_MESSAGE_PACKET:
-      A_DeliverMessagePacket();
+      A_DeliverMessagePacket(sockfd, msg);
       break;
     case DISCONNECT:
-      A_Disconnect();
+      A_Disconnect(sockfd);
       break;
   }
   return true;
 }
 
-void CMessageHandler::A_ClientAuth(){}
-void CMessageHandler::A_GetAvailableRooms(){}
-void CMessageHandler::A_GetRoomStatus(){}
-void CMessageHandler::A_CreateRoom(){}
-void CMessageHandler::A_JoinRoom(){}
-void CMessageHandler::A_LeaveRoom(){}
-void CMessageHandler::A_DeliverMessagePacket(){}
-void CMessageHandler::A_Disconnect(){}
+void CMessageHandler::A_ClientAuth(int, std::string&){}
+void CMessageHandler::A_GetAvailableRooms(int){}
+void CMessageHandler::A_GetRoomStatus(int, std::string&){}
+void CMessageHandler::A_CreateRoom(int, std::string&){}
+void CMessageHandler::A_JoinRoom(int, std::string&){}
+void CMessageHandler::A_LeaveRoom(int, std::string&){}
+void CMessageHandler::A_DeliverMessagePacket(int, std::string&){}
+void CMessageHandler::A_Disconnect(int){}
