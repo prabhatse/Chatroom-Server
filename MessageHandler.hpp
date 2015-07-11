@@ -49,20 +49,6 @@ public:
     /*
       Various types of message handling
     */
-    virtual void A_ClientAuth(int, std::string &);
-    virtual void A_GetAvailableRooms(int);
-    virtual void A_GetRoomStatus(int, std::string &);
-    virtual void A_CreateRoom(int, std::string &);
-    virtual void A_JoinRoom(int, std::string &);
-    virtual void A_LeaveRoom(int, std::string &);
-    virtual void A_DeliverMessagePacket(int, std::string &);
-    virtual void A_Disconnect(int);
-
-    /*
-      Handles message base on action number
-    */
-    virtual bool processMessage(int, int, std::string&);
-
     friend class Network;
 };
 

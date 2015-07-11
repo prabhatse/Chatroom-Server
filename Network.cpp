@@ -6,6 +6,7 @@ CNetwork* CNetwork::network;
 CNetwork::CNetwork(int portno):
         _sockfd(0),
         _portno(portno)
+
 {
   int status;
   _serv_addr.sin_family = AF_INET;
@@ -55,6 +56,7 @@ CNetwork::CNetwork(int portno):
       "Program will now exit. \n");
     exit(EXIT_FAILURE);
   }
+
 }// Network
 
 
@@ -100,14 +102,14 @@ bool CNetwork::acceptConnection(){
 
 bool CNetwork::readPoll(int sockfd){
   _log << "Attempt to read from sockfd " << sockfd << "\n";
-  int msgLength = msgHandler.removeInt(sockfd);
+  int msgLength = removeInt(sockfd);
   /* Close socket if its EOF which is msgLength = -1*/
   if(msgLength == -1){
     closeSocketfd(sockfd);
     return false;
   }
 
-  int action = msgHandler.removeShort(sockfd);
+  int action = removeShort(sockfd);
 
   if(action == -1){
     closeSocketfd(sockfd);
@@ -124,14 +126,14 @@ bool CNetwork::readPoll(int sockfd){
     return false;
   }
 
-  std::string msg = msgHandler.removeBytes(sockfd, msgLength);
+  std::string msg = removeBytes(sockfd, msgLength);
   if(msg.empty()){
     _log << "Error message string is empty\n";
     closeSocketfd(sockfd);
     return false;
   }
 
-  msgHandler.processMessage(sockfd, action, msg);
+  processMessage(sockfd, action, msg);
 
   return true;
 
@@ -141,7 +143,7 @@ void CNetwork::start(){
   int numToRead = setReadPoll(400);
 
   if(numToRead > 0){
-    std::cout << "One connection found." << std::endl;
+    std::cout << "One request found." << std::endl;
     _log << "One request from poll\n";
     for(struct pollfd& pfd: _userPollfd){
 
@@ -201,3 +203,134 @@ void CNetwork::closeSocketfd(int sockfd){
     }
 }
 
+void CNetwork::addRoom(int capacity, std::string name){
+  _log << "Add room with capacity " << capacity <<
+    " and name " << name << "\n";
+  _rooms.push_back(*(new CChatRoom(capacity, name)));
+}
+
+/*****************************
+*******Manages packets********
+*****************************/
+bool CNetwork::processMessage(int sockfd, int action, std::string& msg){
+  switch(action){
+    case CLIENT_AUTH:
+      Write_ClientAuth(sockfd, msg);
+      break;
+    case GET_AVAILABLE_ROOMS:
+      Write_GetAvailableRooms(sockfd, msg);
+      break;
+    case GET_ROOM_STATUS:
+      Write_GetRoomStatus(sockfd, msg);
+      break;
+    case CREATE_ROOM:
+      Write_CreateRoom(sockfd, msg);
+      break;
+    case JOIN_ROOM:
+      Write_JoinRoom(sockfd, msg);
+      break;
+    case LEAVE_ROOM:
+      Write_LeaveRoom(sockfd, msg);
+      break;
+    case DELIVER_MESSAGE_PACKET:
+      Write_DeliverMessagePacket(sockfd, msg);
+      break;
+    case DISCONNECT:
+      Write_Disconnect(sockfd, msg);
+      break;
+  }
+  return true;
+}
+void CNetwork::Write_ClientAuth(int sockfd, std::string &msg){
+  _log << "-------handleClientAuth--------\n";
+  /*std::string result;
+  unsigned int packetSize = ACTION_SIZE + 1 + 1;
+  std::string authenticated("1");
+  appendInt(result, packetSize);
+  _log << "result size is " << result.size() << "\n";
+  appendShort(result, CLIENT_AUTH);
+  _log << "result size is " << result.size() << "\n";
+  appendString(result, authenticated);
+  _log << "send auth message of size " << result.size() << "\n";
+  writeMsg(sockfd, result);*/
+}
+
+void CNetwork::Write_GetAvailableRooms(int sockfd, std::string &msg){
+  _log << "-------handleGetAvailableRooms--------\n";
+  /* Size(4) | Action (2) | NumberRooms(?) |,(1)|rooms|... */
+  std::string result;
+  uint32_t packetSize = 0;
+  uint16_t action = GET_AVAILABLE_ROOMS;
+  std::string numRooms;
+  // Plus 2
+  packetSize = ACTION_SIZE;
+
+  // Should add mutex here */
+  int numberOfRooms = _rooms.size();
+  /* Turn number of rooms into string */
+  numRooms = std::to_string(numberOfRooms);
+  /* If no rooms then don't add anything */
+  if(numberOfRooms == 0){
+    // + 1 stands for ','
+    packetSize += numRooms.size() + 1;
+    appendInt(result, packetSize);
+    appendShort(result, action);
+    appendString(result, numRooms);
+    _log << "No room found \n";
+  }
+  /* Add each room's name to the packet */
+  else{
+    // + 1 stands for ','
+    packetSize += numRooms.size() + 1;
+    for(CChatRoom croom: _rooms){
+      //appendString(result, croom._roomName);
+      packetSize += croom._roomName.size() + 1;
+    }
+    appendInt(result, packetSize);
+    appendShort(result, action);
+    appendString(result, numRooms);
+    /* Append each room */
+    for(CChatRoom croom: _rooms){
+      appendString(result, croom._roomName);
+    }
+  }
+  /* Send out message */
+  writeMsg(sockfd, result);
+}
+
+void CNetwork::Write_GetRoomStatus(int sockfd, std::string &msg){
+ _log << "-------handleGetRoomStatus--------\n";
+}
+
+void CNetwork::Write_CreateRoom(int sockfd, std::string &msg){
+  _log << "-------handleCreateRoom--------\n";
+  std::vector<std::string> words;
+  boost::split(words, msg, boost::is_any_of(","), boost::token_compress_on);
+  int capacity;
+  std::string user = words[1];
+  std::string roomName = words[2];
+  /* Take two bytes from string msg */
+  try {
+    capacity = boost::lexical_cast<int>( words[0] );
+  } catch( boost::bad_lexical_cast const& ) {
+    std::cout << "Error: input string was not valid" << std::endl;
+  }
+
+  addRoom(capacity, roomName);
+}
+
+void CNetwork::Write_JoinRoom(int sockfd, std::string &msg){
+  _log << "-------handleJoinRoom--------\n";
+}
+
+void CNetwork::Write_LeaveRoom(int sockfd, std::string &msg){
+  _log << "-------handleLeaveRoom--------\n";
+}
+
+void CNetwork::Write_DeliverMessagePacket(int sockfd, std::string &msg){
+  _log << "-------handleDeliverMessagePacket--------\n";
+}
+
+void CNetwork::Write_Disconnect(int sockfd, std::string &msg){
+  _log << "-------handleDisconnect--------\n";
+}
