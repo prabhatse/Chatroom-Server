@@ -4,8 +4,6 @@
 #include "Poller.hpp"
 #include "ChatRoom.hpp"
 #include "MessageHandler.hpp"
-#include <boost/lexical_cast.hpp>
-#include <boost/algorithm/string.hpp>
 #include <fcntl.h>
 #include <unistd.h>
 #include <netinet/in.h>
@@ -15,23 +13,28 @@
 #include <vector>
 #include <poll.h>
 #include <fstream>
+#include <thread>
 
+class CChatRoom;
 class CNetwork: public CPoller, public CMessageHandler{
 private:
     static CNetwork* network;
     int _sockfd, _portno;
     sockaddr_in _serv_addr;
     CNetwork(int portno);
-    std::vector<CChatRoom> _rooms;
+    CChatRoom _rooms[MAX_ROOMS];
+    int _numRooms = 0;
     std::vector<std::string> _users;
+    bool _infoModified = false;
 
 public: 
     static CNetwork& getNetwork(int portno=49999);
-    void closeSocketfd(int);
     bool acceptConnection();
     bool readPoll(int);
     void start();
     void addRoom(int, std::string);
+    bool addUser(std::string);
+    void removeUser(std::string);
     /**********************
     *** Write packets****
     **********************/
@@ -45,6 +48,8 @@ public:
     void Write_DeliverMessagePacket(int, std::string&);
     void Write_Disconnect(int, std::string&);
 
+    void threadChatRoom();
+    void printUsers();
 };
 
 #endif

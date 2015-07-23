@@ -6,7 +6,8 @@
 #include <iostream>
 #include <map>
 #include <fstream>
-
+#include <unistd.h>
+#include "Macroz.hpp"
 class CPoller{
   protected:
     std::vector<pollfd> _userPollfd;
@@ -15,6 +16,8 @@ class CPoller{
     virtual int setReadPoll(int);
     virtual bool readPoll(int) = 0;
     virtual bool removePollfd(int);
+    virtual bool addPollfd(int);
+    void closeSocketfd(int);
 };
 
 #endif

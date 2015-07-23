@@ -1,18 +1,6 @@
 #ifndef MESSAGEHANDLER_HPP
 #define MESSAGEHANDLER_HPP
 
-
-#define MESSAGE_SIZE 4
-#define ACTION_SIZE 2
-
-#define CLIENT_AUTH 0
-#define GET_AVAILABLE_ROOMS 1
-#define GET_ROOM_STATUS 2
-#define CREATE_ROOM 3
-#define JOIN_ROOM 4
-#define LEAVE_ROOM 5
-#define DELIVER_MESSAGE_PACKET 6
-#define DISCONNECT 7
 #include <iostream>
 #include <string>
 #include <string.h>
